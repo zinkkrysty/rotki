@@ -34,6 +34,7 @@ from rotkehlchen.chain.evm.types import EvmAccount
 from rotkehlchen.chain.gnosis.constants import GNOSIS_ETHERSCAN_NODE_NAME
 from rotkehlchen.chain.optimism.constants import OPTIMISM_ETHERSCAN_NODE_NAME
 from rotkehlchen.chain.polygon_pos.constants import POLYGON_POS_ETHERSCAN_NODE_NAME
+from rotkehlchen.chain.scroll.constants import SCROLL_ETHERSCAN_NODE_NAME
 from rotkehlchen.chain.substrate.types import SubstrateAddress, SubstratePublicKey
 from rotkehlchen.chain.substrate.utils import (
     get_substrate_address_from_public_key,
@@ -2232,7 +2233,10 @@ class LocationAssetMappingUpdateEntrySchema(LocationAssetMappingsBaseSchema):
             data: dict[str, Any],
             **_kwargs: Any,
     ) -> LocationAssetMappingUpdateEntry:
-        return LocationAssetMappingUpdateEntry.deserialize(data)
+        try:
+            return LocationAssetMappingUpdateEntry.deserialize(data)
+        except DeserializationError as e:
+            raise ValidationError(f'Could not deserialize data: {e!s}') from e
 
 
 class LocationAssetMappingDeleteEntrySchema(LocationAssetMappingsBaseSchema):
@@ -2244,7 +2248,10 @@ class LocationAssetMappingDeleteEntrySchema(LocationAssetMappingsBaseSchema):
             data: dict[str, Any],
             **_kwargs: Any,
     ) -> LocationAssetMappingDeleteEntry:
-        return LocationAssetMappingDeleteEntry.deserialize(data)
+        try:
+            return LocationAssetMappingDeleteEntry.deserialize(data)
+        except DeserializationError as e:
+            raise ValidationError(f'Could not deserialize data: {e!s}') from e
 
 
 class LocationAssetMappingsUpdateSchema(LocationAssetMappingsBaseSchema):
@@ -2966,6 +2973,7 @@ class RpcNodeEditSchema(RpcAddNodeSchema):
                 ARBITRUM_ONE_ETHERSCAN_NODE_NAME,
                 BASE_ETHERSCAN_NODE_NAME,
                 GNOSIS_ETHERSCAN_NODE_NAME,
+                SCROLL_ETHERSCAN_NODE_NAME,
             ):
                 raise ValidationError(
                     message="Can't change the etherscan node name",
